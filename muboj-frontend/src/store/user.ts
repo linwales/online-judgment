@@ -1,23 +1,30 @@
 // initial state
 import { StoreOptions } from "vuex";
-// getters
-// actions 执行异步操作，并且触发更新mutation
-// mutations 对变量进行增删改查的方法，尽量同步
+import ACCESS_ENUM from "@/access/accessEnum";
+import { UserControllerService } from "../../generated";
+
 export default {
   namespaced: true,
   state: () => ({
     loginUser: {
-      userName: "未登录用户",
+      userName: "未登录",
     },
   }),
   actions: {
-    getLoginUser({ commit, state }, payload) {
-      // todo 改为从远程请求获取登录信息
-      commit("updateUser", { userName: "mumubai" });
+    async getLoginUser({ commit, state }, payload) {
+      // 从远程请求获取登录信息
+      const res = await UserControllerService.getLoginUserUsingGet();
+      if (res.code === 0) {
+        commit("updateUser", res.data);
+      } else {
+        commit("updateUser", {
+          ...state.loginUser,
+          userRole: ACCESS_ENUM.NOT_LOGIN,
+        });
+      }
     },
   },
   mutations: {
-    // 修改全局用户变量
     updateUser(state, payload) {
       state.loginUser = payload;
     },
